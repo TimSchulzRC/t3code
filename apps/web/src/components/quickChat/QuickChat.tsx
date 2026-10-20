@@ -7,6 +7,7 @@ import {
   type AtomCommandResult,
 } from "@t3tools/client-runtime/state/runtime";
 import {
+  AuthOrchestrationOperateScope,
   DEFAULT_PROVIDER_INTERACTION_MODE,
   DEFAULT_SERVER_SETTINGS,
   type EnvironmentId,
@@ -27,6 +28,7 @@ import {
   usePrimaryEnvironmentId,
 } from "../../state/environments";
 import { projectEnvironment } from "../../state/projects";
+import { useEnvironmentScope } from "../../state/session";
 import { threadEnvironment } from "../../state/threads";
 import { useAtomCommand } from "../../state/use-atom-command";
 import { useOrchestrationCommand } from "../../state/use-orchestration-command";
@@ -88,6 +90,8 @@ export function QuickChat() {
     selectedEnvironmentId,
   );
   const environment = offered.find((entry) => entry.environmentId === environmentId) ?? null;
+  // Subscribing also keeps the session loaded for the operate check when sending.
+  const canOperate = useEnvironmentScope(environmentId, AuthOrchestrationOperateScope);
   const connecting = environments.some(
     (entry) => entry.connection.phase === "connecting" || entry.connection.phase === "reconnecting",
   );
@@ -158,7 +162,7 @@ export function QuickChat() {
 
   const send = async () => {
     const text = prompt.trim();
-    if (text.length === 0 || sending || environmentId === null) return;
+    if (text.length === 0 || sending || environmentId === null || !canOperate) return;
     setSending(true);
     setError(null);
     try {
@@ -304,7 +308,9 @@ export function QuickChat() {
               <Button
                 size="icon-sm"
                 aria-label="Start thread"
-                disabled={sending || prompt.trim().length === 0 || environment === null}
+                disabled={
+                  sending || prompt.trim().length === 0 || environment === null || !canOperate
+                }
                 onClick={() => void send()}
               >
                 {sending ? <Spinner /> : <ArrowUpIcon aria-hidden />}
