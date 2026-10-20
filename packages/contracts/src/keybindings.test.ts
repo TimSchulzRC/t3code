@@ -5,6 +5,7 @@ import * as Effect from "effect/Effect";
 import {
   KeybindingsConfig,
   KeybindingRule,
+  KeybindingShortcut,
   ResolvedKeybindingRule,
   ResolvedKeybindingsConfig,
 } from "./keybindings.ts";
@@ -21,6 +22,20 @@ const decode = <S extends Schema.Top>(
 
 const decodeResolvedRule = Schema.decodeUnknownEffect(ResolvedKeybindingRule as never);
 const encodeResolvedKeybindings = Schema.encodeEffect(ResolvedKeybindingsConfig);
+
+it.effect("keeps the space key in a shortcut", () =>
+  Effect.gen(function* () {
+    const parsed = yield* decode(KeybindingShortcut, {
+      key: " ",
+      metaKey: false,
+      ctrlKey: false,
+      shiftKey: false,
+      altKey: true,
+      modKey: false,
+    });
+    assert.strictEqual(parsed.key, " ");
+  }),
+);
 
 it.effect("rejects invalid command values", () =>
   Effect.gen(function* () {

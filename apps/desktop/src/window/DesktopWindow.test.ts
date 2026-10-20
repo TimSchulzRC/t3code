@@ -67,6 +67,7 @@ import * as ElectronDialog from "../electron/ElectronDialog.ts";
 import * as ElectronProtocol from "../electron/ElectronProtocol.ts";
 import * as ElectronSafeStorage from "../electron/ElectronSafeStorage.ts";
 import * as DesktopIpc from "../ipc/DesktopIpc.ts";
+import * as DesktopQuickChat from "../quickChat/DesktopQuickChat.ts";
 import * as DesktopSnapShot from "../snapShot/DesktopSnapShot.ts";
 import * as DesktopShellEnvironment from "../shell/DesktopShellEnvironment.ts";
 import * as DesktopTelemetryPublisher from "../telemetry/DesktopTelemetryPublisher.ts";
@@ -328,6 +329,7 @@ function layerTest(input: {
         ? Ref.get(input.mainWindow)
         : Effect.succeedSome(input.focusedWindow),
     setMain: (window) => Ref.set(input.mainWindow, Option.some(window)),
+    markAuxiliary: () => Effect.void,
     clearMain: () => Ref.set(input.mainWindow, Option.none()),
     prepareReveal: () => Effect.succeed(false),
     reveal: (window) => Effect.sync(() => input.onReveal?.(window)),
@@ -452,6 +454,7 @@ const makeSplashScenario = (
       currentMainOrFirst,
       focusedMainOrFirst: currentMainOrFirst,
       setMain: (window) => Ref.set(mainWindow, Option.some(window)),
+      markAuxiliary: () => Effect.void,
       clearMain: () => Ref.set(mainWindow, Option.none()),
       prepareReveal: () => Effect.succeed(false),
       reveal: (window) => Ref.update(revealedWindows, (windows) => [...windows, window]),
@@ -588,6 +591,7 @@ describe("DesktopWindow", () => {
           load: () => Effect.void,
         }),
         Layer.mock(DesktopSnapShot.DesktopSnapShot)({ initialize: Effect.void }),
+        Layer.mock(DesktopQuickChat.DesktopQuickChat)({ initialize: Effect.void }),
         Layer.mock(DesktopAppActivation.DesktopAppActivation)({ start: Effect.void }),
         Layer.mock(DesktopWslBackend.DesktopWslBackend)({ reconcile: Effect.void }),
         Layer.mock(DesktopBackendPool.DesktopBackendPool)({

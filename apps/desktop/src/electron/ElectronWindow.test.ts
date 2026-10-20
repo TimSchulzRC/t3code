@@ -4,6 +4,7 @@ import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
 import * as Layer from "effect/Layer";
+import * as Option from "effect/Option";
 import type * as Electron from "electron";
 import { beforeEach, vi } from "vite-plus/test";
 
@@ -187,6 +188,34 @@ describe("ElectronWindow", () => {
       );
 
       assert.deepEqual(syncedWindows, [liveWindow]);
+    }).pipe(Effect.provide(layerTest)),
+  );
+
+  it.effect("keeps auxiliary windows out of main window fallbacks and appearance sync", () =>
+    Effect.gen(function* () {
+      const auxiliaryWindow = makeBrowserWindow({ id: 1, destroyed: false });
+      const appWindow = makeBrowserWindow({ id: 2, destroyed: false });
+      getAllWindowsMock.mockReturnValue([auxiliaryWindow, appWindow]);
+      getFocusedWindowMock.mockReturnValue(auxiliaryWindow);
+
+      const electronWindow = yield* ElectronWindow.ElectronWindow;
+      yield* electronWindow.markAuxiliary(auxiliaryWindow);
+      const syncedWindows: Electron.BrowserWindow[] = [];
+      yield* electronWindow.syncAllAppearance((window) =>
+        Effect.sync(() => {
+          syncedWindows.push(window);
+        }),
+      );
+
+      assert.strictEqual(
+        (yield* electronWindow.currentMainOrFirst).pipe(Option.getOrNull),
+        appWindow,
+      );
+      assert.strictEqual(
+        (yield* electronWindow.focusedMainOrFirst).pipe(Option.getOrNull),
+        appWindow,
+      );
+      assert.deepEqual(syncedWindows, [appWindow]);
     }).pipe(Effect.provide(layerTest)),
   );
 

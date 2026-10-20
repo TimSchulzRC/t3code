@@ -1660,6 +1660,12 @@ body {
   padding: 0;
 }
 
+/* The desktop quick chat window is transparent around its card. */
+html[data-quick-chat],
+html[data-quick-chat] body {
+  background: transparent !important;
+}
+
 html,
 body {
   min-height: calc(100svh + env(safe-area-inset-top));

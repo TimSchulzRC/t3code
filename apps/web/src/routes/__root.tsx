@@ -1,5 +1,5 @@
 import { PermissionUpdateNotice } from "../components/PermissionUpdateNotice";
-import { type ServerLifecycleWelcomePayload } from "@t3tools/contracts";
+import { QUICK_CHAT_APP_PATH, type ServerLifecycleWelcomePayload } from "@t3tools/contracts";
 import { scopedProjectKey, scopeProjectRef } from "@t3tools/client-runtime/environment";
 import {
   Outlet,
@@ -110,7 +110,8 @@ export const Route = createRootRoute({
       authGateState.status === "authenticated" &&
       getDesktopSnapShotBridge() &&
       shouldResumeSnapShotSetupOnStartup() &&
-      location.pathname !== "/settings/snap-shot"
+      location.pathname !== "/settings/snap-shot" &&
+      location.pathname !== QUICK_CHAT_APP_PATH
     ) {
       throw redirect({ to: "/settings/snap-shot", replace: true });
     }
@@ -158,6 +159,20 @@ function RootRouteView() {
       <>
         <DocumentTitleSync />
         <BrowserChromeThemeSync key={pathname} />
+        <Outlet />
+      </>
+    );
+  }
+
+  // The desktop quick chat window renders only its card: no app shell, and none of
+  // the coordinators that must run once per app.
+  if (pathname === QUICK_CHAT_APP_PATH) {
+    return (
+      <>
+        <DocumentTitleSync />
+        <ContrastAppearanceSync />
+        <GlassAppearanceSync />
+        <FontAppearanceSync />
         <Outlet />
       </>
     );

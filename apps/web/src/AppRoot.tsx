@@ -1,4 +1,5 @@
 import { RouterProvider } from "@tanstack/react-router";
+import { QUICK_CHAT_APP_PATH } from "@t3tools/contracts";
 import { useEffect } from "react";
 
 import { subscribeComposerDraftModelReconciliation } from "./composerDraftStore";
@@ -17,22 +18,31 @@ import type { AppRouter } from "./router";
  * as routed UI.
  */
 export function AppRoot({ router }: { readonly router: AppRouter }) {
+  // The desktop quick chat window shares this origin's storage with the main
+  // window, so it must not write drafts or host the main window's surfaces.
+  const quickChat = router.state.location.pathname === QUICK_CHAT_APP_PATH;
   useEffect(
     () =>
-      subscribeComposerDraftModelReconciliation({
-        registry: appAtomRegistry,
-        threadShellAtom: environmentThreadShells.threadShellAtom,
-        threadRefsAtom: environmentThreadShells.threadRefsAtom,
-        shellStateAtom: environmentShell.stateAtom,
-      }),
-    [],
+      quickChat
+        ? undefined
+        : subscribeComposerDraftModelReconciliation({
+            registry: appAtomRegistry,
+            threadShellAtom: environmentThreadShells.threadShellAtom,
+            threadRefsAtom: environmentThreadShells.threadRefsAtom,
+            shellStateAtom: environmentShell.stateAtom,
+          }),
+    [quickChat],
   );
   return (
     <AppAtomRegistryProvider>
       <RouterProvider router={router} />
-      <ElectronBrowserHost />
-      <BrowserProfileReporter />
-      <QuitHoldOverlay />
+      {quickChat ? null : (
+        <>
+          <ElectronBrowserHost />
+          <BrowserProfileReporter />
+          <QuitHoldOverlay />
+        </>
+      )}
     </AppAtomRegistryProvider>
   );
 }

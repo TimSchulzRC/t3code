@@ -53,6 +53,12 @@ export const SET_SNAP_SHOT_ANIMATION_DESTINATION_CHANNEL =
   "desktop:set-snap-shot-animation-destination";
 export const DISMISS_SNAP_SHOT_ANIMATION_CHANNEL = "desktop:dismiss-snap-shot-animation";
 export const ACKNOWLEDGE_SNAP_SHOT_CHANNEL = "desktop:acknowledge-snap-shot";
+export const CHECK_QUICK_CHAT_SHORTCUT_CHANNEL = "desktop:check-quick-chat-shortcut";
+export const SET_QUICK_CHAT_SHORTCUT_SUPPRESSED_CHANNEL =
+  "desktop:set-quick-chat-shortcut-suppressed";
+export const RESIZE_QUICK_CHAT_CHANNEL = "desktop:resize-quick-chat";
+export const HIDE_QUICK_CHAT_CHANNEL = "desktop:hide-quick-chat";
+export const OPEN_QUICK_CHAT_THREAD_CHANNEL = "desktop:open-quick-chat-thread";
 export const GET_CONNECTION_CATALOG_CHANNEL = "desktop:get-connection-catalog";
 export const SET_CONNECTION_CATALOG_CHANNEL = "desktop:set-connection-catalog";
 export const CLEAR_CONNECTION_CATALOG_CHANNEL = "desktop:clear-connection-catalog";

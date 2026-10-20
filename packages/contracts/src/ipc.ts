@@ -2,7 +2,7 @@ import * as Schema from "effect/Schema";
 import type { PreviewCaptureFailureEncoded } from "./previewCapture.ts";
 
 import { SnapShotSource } from "./chatAttachment.ts";
-import { EnvironmentId, TrimmedNonEmptyString } from "./baseSchemas.ts";
+import { EnvironmentId, ThreadId, TrimmedNonEmptyString } from "./baseSchemas.ts";
 import { BrowserProfileId } from "./browserProfile.ts";
 import type {
   BrowserImportResult,
@@ -12,7 +12,12 @@ import type {
 import { AuthAccessTokenResult, AuthSessionState, AuthWebSocketTicketResult } from "./auth.ts";
 import { AdvertisedEndpoint } from "./remoteAccess.ts";
 import { ExecutionEnvironmentDescriptor } from "./environment.ts";
-import { type ClientSettings, type QuitConfirmationMode, SnapShotShortcut } from "./settings.ts";
+import {
+  type ClientSettings,
+  type QuitConfirmationMode,
+  SnapShotKeyChord,
+  SnapShotShortcut,
+} from "./settings.ts";
 import type { EditorId } from "./editor.ts";
 import type { PreviewForwardedShortcut } from "./keybindings.ts";
 
@@ -204,6 +209,15 @@ export const DesktopSnapShotShortcutAvailability = Schema.Struct({
   message: Schema.NullOr(Schema.String),
 });
 export type DesktopSnapShotShortcutAvailability = typeof DesktopSnapShotShortcutAvailability.Type;
+
+/** The app route the desktop quick chat window renders. */
+export const QUICK_CHAT_APP_PATH = "/quick-chat";
+
+export const DesktopQuickChatThread = Schema.Struct({
+  environmentId: EnvironmentId,
+  threadId: ThreadId,
+});
+export type DesktopQuickChatThread = typeof DesktopQuickChatThread.Type;
 
 export const DesktopSnapShotId = TrimmedNonEmptyString.check(
   Schema.isMaxLength(64),
@@ -1077,6 +1091,15 @@ export interface DesktopBridge {
   ) => Promise<void>;
   dismissSnapShotAnimation?: (id: DesktopSnapShotId) => Promise<void>;
   acknowledgeSnapShot?: (id: string) => Promise<void>;
+  checkQuickChatShortcut?: (
+    shortcut: SnapShotKeyChord,
+  ) => Promise<DesktopSnapShotShortcutAvailability>;
+  setQuickChatShortcutSuppressed?: (suppressed: boolean) => Promise<void>;
+  /** Fits the quick chat window to its content, keeping its bottom edge in place. */
+  resizeQuickChat?: (height: number) => Promise<void>;
+  hideQuickChat?: () => Promise<void>;
+  /** Hides the quick chat window and shows the thread in the main window. */
+  openQuickChatThread?: (thread: DesktopQuickChatThread) => Promise<void>;
   ensureSshEnvironment: (
     target: DesktopSshEnvironmentTarget,
     options?: { issuePairingToken?: boolean },

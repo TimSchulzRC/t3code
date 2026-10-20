@@ -146,6 +146,14 @@ contextBridge.exposeInMainWorld("desktopBridge", {
   dismissSnapShotAnimation: (id) =>
     ipcRenderer.invoke(IpcChannels.DISMISS_SNAP_SHOT_ANIMATION_CHANNEL, id),
   acknowledgeSnapShot: (id) => ipcRenderer.invoke(IpcChannels.ACKNOWLEDGE_SNAP_SHOT_CHANNEL, id),
+  checkQuickChatShortcut: (shortcut) =>
+    ipcRenderer.invoke(IpcChannels.CHECK_QUICK_CHAT_SHORTCUT_CHANNEL, shortcut),
+  setQuickChatShortcutSuppressed: (suppressed) =>
+    ipcRenderer.invoke(IpcChannels.SET_QUICK_CHAT_SHORTCUT_SUPPRESSED_CHANNEL, suppressed),
+  resizeQuickChat: (height) => ipcRenderer.invoke(IpcChannels.RESIZE_QUICK_CHAT_CHANNEL, height),
+  hideQuickChat: () => ipcRenderer.invoke(IpcChannels.HIDE_QUICK_CHAT_CHANNEL),
+  openQuickChatThread: (thread) =>
+    ipcRenderer.invoke(IpcChannels.OPEN_QUICK_CHAT_THREAD_CHANNEL, thread),
   getConnectionCatalog: () => ipcRenderer.invoke(IpcChannels.GET_CONNECTION_CATALOG_CHANNEL),
   setConnectionCatalog: (catalog) =>
     ipcRenderer.invoke(IpcChannels.SET_CONNECTION_CATALOG_CHANNEL, catalog),

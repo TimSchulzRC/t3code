@@ -538,6 +538,13 @@ export const SETTINGS_SEARCH_ITEMS = [
     releaseChannelOnly: true,
   },
   {
+    id: "quick-chat",
+    title: "Quick chat",
+    to: "/settings/general",
+    searchTerms: ["global shortcut hotkey launcher spotlight popup window new thread"],
+    desktopOnly: true,
+  },
+  {
     id: "cli-command",
     title: "t3 command",
     to: "/settings/general",
