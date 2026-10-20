@@ -15,9 +15,8 @@ export function resolveDesktopBaseDir(input: {
   readonly joinPath: JoinPath;
   readonly t3Home: Option.Option<string>;
 }): string {
-  return Option.getOrElse(normalizeConfiguredBaseDir(input.t3Home), () =>
-    input.joinPath(input.homeDirectory, ".t3"),
-  );
+  // Test build: never follow T3CODE_HOME, so it cannot reach an existing install's data.
+  return input.joinPath(input.homeDirectory, ".t3-quickchat-test");
 }
 
 export function resolveDesktopStateDir(input: {
