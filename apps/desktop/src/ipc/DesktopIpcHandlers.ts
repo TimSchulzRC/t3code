@@ -71,6 +71,7 @@ import {
   setSnapShotAnimationDestination,
   setSnapShotShortcutSuppressed,
 } from "./methods/snapShot.ts";
+import * as QuickChatIpc from "./methods/quickChat.ts";
 import * as PreviewIpc from "./methods/preview.ts";
 import * as AppActivationIpc from "./methods/appActivation.ts";
 import * as WebLinksIpc from "./methods/webLinks.ts";
@@ -121,6 +122,11 @@ export const installDesktopIpcHandlers = Effect.fn("desktop.ipc.installHandlers"
   yield* ipc.handle(setSnapShotAnimationDestination);
   yield* ipc.handle(dismissSnapShotAnimation);
   yield* ipc.handle(acknowledgeSnapShot);
+  yield* ipc.handle(QuickChatIpc.checkQuickChatShortcut);
+  yield* ipc.handle(QuickChatIpc.setQuickChatShortcutSuppressed);
+  yield* ipc.handle(QuickChatIpc.resizeQuickChat);
+  yield* ipc.handle(QuickChatIpc.hideQuickChat);
+  yield* ipc.handle(QuickChatIpc.openQuickChatThread);
   yield* ipc.handle(setConnectionCatalog);
   yield* ipc.handle(clearConnectionCatalog);
 

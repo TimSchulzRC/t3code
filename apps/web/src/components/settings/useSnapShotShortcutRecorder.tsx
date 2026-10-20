@@ -30,24 +30,35 @@ const MODIFIER_CODES: Readonly<Record<SnapShotModifier, readonly [string, string
   alt: ["AltLeft", "AltRight"],
 };
 
+const suppressSnapShotShortcut = (suppressed: boolean) =>
+  getDesktopSnapShotBridge()?.setSnapShotShortcutSuppressed(suppressed);
+
 export function useSnapShotShortcutRecorder({
   shortcut,
   shortcutLabel,
+  name = "snapshot",
   disabled = false,
   allowModifierPairs = true,
+  suppressShortcuts = suppressSnapShotShortcut,
   onRecord,
   onStart,
   onError,
 }: {
   shortcut: SnapShotShortcut;
   shortcutLabel?: string | undefined;
+  /** Names the shortcut for assistive technology. */
+  name?: string;
   disabled?: boolean;
   allowModifierPairs?: boolean;
+  /**
+   * Pauses the global shortcuts that would otherwise swallow the keys being
+   * recorded. Recording is unavailable when it returns nothing.
+   */
+  suppressShortcuts?: (suppressed: boolean) => Promise<void> | undefined;
   onRecord: (shortcut: SnapShotShortcut) => void;
   onStart?: () => void;
   onError: (message: string) => void;
 }) {
-  const bridge = getDesktopSnapShotBridge();
   const displayShortcut = shortcutLabel ? parseDesktopSnapShotShortcut(shortcutLabel) : shortcut;
   const [recording, setRecording] = useState(false);
   const [requests] = useState(createRecordingRequestTracker);
@@ -56,16 +67,21 @@ export function useSnapShotShortcutRecorder({
     requests.clear();
     heldModifierCodes.current.clear();
     setRecording(false);
-    void bridge?.setSnapShotShortcutSuppressed(false).catch(() => undefined);
+    void suppressShortcuts(false)?.catch(() => undefined);
   };
   const startRecording = async () => {
-    if (!bridge || disabled) return;
+    if (disabled) return;
     const request = requests.tryBegin();
     if (!request) return;
     heldModifierCodes.current.clear();
+    const suppressed = suppressShortcuts(true);
+    if (suppressed === undefined) {
+      requests.clear();
+      return;
+    }
     onStart?.();
     try {
-      await bridge.setSnapShotShortcutSuppressed(true);
+      await suppressed;
       if (requests.owns(request)) setRecording(true);
     } catch (error) {
       if (!requests.owns(request)) return;
@@ -76,9 +92,9 @@ export function useSnapShotShortcutRecorder({
   useEffect(
     () => () => {
       requests.clear();
-      void bridge?.setSnapShotShortcutSuppressed(false).catch(() => undefined);
+      void suppressShortcuts(false)?.catch(() => undefined);
     },
-    [bridge, requests],
+    [suppressShortcuts, requests],
   );
   const recordShortcut = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (!recording || event.key === "Tab" || event.repeat) return;
@@ -126,8 +142,8 @@ export function useSnapShotShortcutRecorder({
         disabled={disabled}
         aria-label={
           displayShortcut
-            ? `Record snapshot shortcut, currently ${formatSnapShotShortcutLabel(displayShortcut)}`
-            : "Change snapshot shortcut"
+            ? `Record ${name} shortcut, currently ${formatSnapShotShortcutLabel(displayShortcut)}`
+            : `Change ${name} shortcut`
         }
         aria-pressed={recording}
         data-keybinding-capture=""
